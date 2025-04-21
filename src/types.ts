@@ -39,8 +39,8 @@ export interface JobData {
 
 export interface CreateJobRequest {
   user_address: string;
-  stake_amount: string;
-  token_amount: string;
+  stake_amount: number;
+  token_amount: number;
   task_definition_id: number;
   priority: number;
   security: number;

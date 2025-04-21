@@ -15,7 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.TriggerXSDK = void 0;
 const axios_1 = __importDefault(require("axios"));
 class TriggerXSDK {
-    constructor(apiKey, baseURL = 'https://api.triggerx.network') {
+    constructor(apiKey, baseURL = 'http://192.168.1.57:9002/') {
         this.client = axios_1.default.create({
             baseURL,
             headers: {
