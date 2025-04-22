@@ -20,11 +20,11 @@ const privateKey = 'YOUR_PRIVATE_KEY';
 const signer = new ethers.Wallet(privateKey, provider);
 
 // Initialize SDK
-const sdk = new TriggerXSDK('your-api-key');
+const triggerx = new TriggerXSDK('your-api-key');
 
 // Create a simple time-based job
 async function createTimeBasedJob() {
-  const job = await sdk.createStaticTimeBasedJob({
+  const job = await triggerx.createStaticTimeBasedJob({
     userAddress: await signer.getAddress(),
     timeInterval: 3600, // 1 hour
     targetChainId: '1',
@@ -44,7 +44,7 @@ async function createTimeBasedJob() {
 
 #### Static Time-Based Job
 ```typescript
-const staticTimeJob = await sdk.createStaticTimeBasedJob({
+const staticTimeJob = await triggerx.createStaticTimeBasedJob({
   userAddress: walletAddress,
   timeInterval: 3600, // Execute every hour
   targetChainId: '1',
@@ -59,7 +59,7 @@ const staticTimeJob = await sdk.createStaticTimeBasedJob({
 
 #### Dynamic Time-Based Job
 ```typescript
-const dynamicTimeJob = await sdk.createDynamicTimeBasedJob({
+const dynamicTimeJob = await triggerx.createDynamicTimeBasedJob({
   userAddress: walletAddress,
   timeInterval: 3600,
   targetChainId: '1',
@@ -75,7 +75,7 @@ const dynamicTimeJob = await sdk.createDynamicTimeBasedJob({
 
 #### Static Event-Based Job
 ```typescript
-const staticEventJob = await sdk.createStaticEventBasedJob({
+const staticEventJob = await triggerx.createStaticEventBasedJob({
   userAddress: walletAddress,
   triggerChainId: '1',
   triggerContract: '0x...', // Contract to monitor
@@ -89,7 +89,7 @@ const staticEventJob = await sdk.createStaticEventBasedJob({
 
 #### Dynamic Event-Based Job
 ```typescript
-const dynamicEventJob = await sdk.createDynamicEventBasedJob({
+const dynamicEventJob = await triggerx.createDynamicEventBasedJob({
   userAddress: walletAddress,
   triggerChainId: '1',
   triggerContract: '0x...',
@@ -107,7 +107,7 @@ const dynamicEventJob = await sdk.createDynamicEventBasedJob({
 
 #### Static Condition-Based Job
 ```typescript
-const staticConditionJob = await sdk.createStaticConditionBasedJob({
+const staticConditionJob = await triggerx.createStaticConditionBasedJob({
   userAddress: walletAddress,
   targetChainId: '1',
   targetContract: '0x...',
@@ -120,7 +120,7 @@ const staticConditionJob = await sdk.createStaticConditionBasedJob({
 
 #### Dynamic Condition-Based Job
 ```typescript
-const dynamicConditionJob = await sdk.createDynamicConditionBasedJob({
+const dynamicConditionJob = await triggerx.createDynamicConditionBasedJob({
   userAddress: walletAddress,
   targetChainId: '1',
   targetContract: '0x...',
@@ -162,29 +162,29 @@ const dynamicConditionJob = await sdk.createDynamicConditionBasedJob({
 
 ```typescript
 // Get user data
-const userData = await sdk.getUserData(userId);
+const userData = await triggerx.getUserData(userId);
 
 // Get wallet points
-const points = await sdk.getWalletPoints(walletAddress);
+const points = await triggerx.getWalletPoints(walletAddress);
 ```
 
 ## Job Management Methods
 
 ```typescript
 // Get job data
-const jobData = await sdk.getJobData(jobId);
+const jobData = await triggerx.getJobData(jobId);
 
 // Update job
-await sdk.updateJob(jobId, {
+await triggerx.updateJob(jobId, {
   recurring: true,
   time_frame: 3600
 });
 
 // Update job's last execution time
-await sdk.updateJobLastExecuted(jobId);
+await triggerx.updateJobLastExecuted(jobId);
 
 // Get all jobs for a user
-const userJobs = await sdk.getJobsByUserAddress(walletAddress);
+const userJobs = await triggerx.getJobsByUserAddress(walletAddress);
 ```
 
 ## Error Handling
@@ -193,7 +193,7 @@ The SDK uses axios for HTTP requests. Always wrap SDK calls in try-catch blocks:
 
 ```typescript
 try {
-  const job = await sdk.createStaticTimeBasedJob({...});
+  const job = await triggerx.createStaticTimeBasedJob({...});
 } catch (error) {
   if (axios.isAxiosError(error)) {
     console.error('API Error:', error.response?.data);
