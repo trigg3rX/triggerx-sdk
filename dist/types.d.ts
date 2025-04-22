@@ -73,3 +73,51 @@ export interface JobSummary {
 export interface WalletPoints {
     total_points: number;
 }
+export declare enum TriggerType {
+    TIME = "TIME",
+    CONDITION = "CONDITION",
+    EVENT = "EVENT"
+}
+export declare enum TaskType {
+    STATIC = "STATIC",
+    DYNAMIC = "DYNAMIC"
+}
+export declare const TaskDefinitionIds: {
+    TIME: {
+        STATIC: number;
+        DYNAMIC: number;
+    };
+    CONDITION: {
+        STATIC: number;
+        DYNAMIC: number;
+    };
+    EVENT: {
+        STATIC: number;
+        DYNAMIC: number;
+    };
+};
+export interface CreateJobOptions {
+    name: string;
+    triggerType: TriggerType;
+    taskType: TaskType;
+    timeInterval?: number;
+    startTime?: number;
+    eventConfig?: {
+        chainId: string;
+        contractAddress: string;
+        eventName: string;
+        topics?: Array<string | null>;
+        blockConfirmations?: number;
+    };
+    conditionConfig?: {
+        scriptIpfsUrl: string;
+        scriptTriggerFunction: string;
+    };
+    targetChainId: string;
+    targetContract: string;
+    targetFunction: string;
+    arguments: string[];
+    priority?: number;
+    security?: number;
+    recurring?: boolean;
+}
