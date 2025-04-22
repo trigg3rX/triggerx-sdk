@@ -1,6 +1,6 @@
 # TriggerX SDK
 
-Official TypeScript/JavaScript SDK for interacting with the TriggerX Network API. This SDK allows you to create and manage automated blockchain tasks with different trigger types: Time-based, Event-based, and Condition-based.
+Official TypeScript/JavaScript SDK for interacting with the TriggerX Network API. This SDK allows you to create and manage automated blockchain tasks with three types of jobs: Time-based, Event-based, and Condition-based. Each job type supports both static and dynamic execution modes.
 
 ## Installation
 
@@ -24,13 +24,14 @@ const triggerx = new TriggerXSDK('your-api-key');
 
 // Create a simple time-based job
 async function createTimeBasedJob() {
-  const job = await triggerx.createStaticTimeBasedJob({
+  const job = await triggerx.createTimeBasedJob({
     userAddress: await signer.getAddress(),
     timeInterval: 3600, // 1 hour
     targetChainId: '1',
     targetContract: '0x...', // Your target contract
     targetFunction: 'executeDaily',
     arguments: ['param1', 'param2'],
+    isDynamic: false, // Static execution mode
     stake_amount: '1000000000000000000', // 1 ETH
     token_amount: '1000000000000000000'
   });
@@ -38,33 +39,29 @@ async function createTimeBasedJob() {
 }
 ```
 
-## Job Types
+## Job Types and Execution Modes
 
 ### 1. Time-Based Jobs
-
-#### Static Time-Based Job
 ```typescript
-const staticTimeJob = await triggerx.createStaticTimeBasedJob({
+// Static Time-Based Job
+const staticTimeJob = await triggerx.createTimeBasedJob({
   userAddress: walletAddress,
   timeInterval: 3600, // Execute every hour
   targetChainId: '1',
   targetContract: '0x...',
   targetFunction: 'executeDaily',
-  arguments: ['param1'],
-  priority: 1,
-  security: 1,
-  recurring: true
+  isDynamic: false, // Static mode
+  arguments: ['param1']
 });
-```
 
-#### Dynamic Time-Based Job
-```typescript
-const dynamicTimeJob = await triggerx.createDynamicTimeBasedJob({
+// Dynamic Time-Based Job
+const dynamicTimeJob = await triggerx.createTimeBasedJob({
   userAddress: walletAddress,
   timeInterval: 3600,
   targetChainId: '1',
   targetContract: '0x...',
   targetFunction: 'executeDaily',
+  isDynamic: true, // Dynamic mode
   scriptIpfsUrl: 'ipfs://...', // Required for dynamic jobs
   scriptTriggerFunction: 'checkCondition', // Required for dynamic jobs
   arguments: ['param1']
@@ -72,10 +69,9 @@ const dynamicTimeJob = await triggerx.createDynamicTimeBasedJob({
 ```
 
 ### 2. Event-Based Jobs
-
-#### Static Event-Based Job
 ```typescript
-const staticEventJob = await triggerx.createStaticEventBasedJob({
+// Static Event-Based Job
+const staticEventJob = await triggerx.createEventBasedJob({
   userAddress: walletAddress,
   triggerChainId: '1',
   triggerContract: '0x...', // Contract to monitor
@@ -83,13 +79,12 @@ const staticEventJob = await triggerx.createStaticEventBasedJob({
   targetChainId: '1',
   targetContract: '0x...', // Contract to execute
   targetFunction: 'handleTransfer',
+  isDynamic: false,
   arguments: []
 });
-```
 
-#### Dynamic Event-Based Job
-```typescript
-const dynamicEventJob = await triggerx.createDynamicEventBasedJob({
+// Dynamic Event-Based Job
+const dynamicEventJob = await triggerx.createEventBasedJob({
   userAddress: walletAddress,
   triggerChainId: '1',
   triggerContract: '0x...',
@@ -97,6 +92,7 @@ const dynamicEventJob = await triggerx.createDynamicEventBasedJob({
   targetChainId: '1',
   targetContract: '0x...',
   targetFunction: 'handleTransfer',
+  isDynamic: true,
   scriptIpfsUrl: 'ipfs://...',
   scriptTriggerFunction: 'processTransfer',
   arguments: []
@@ -104,27 +100,26 @@ const dynamicEventJob = await triggerx.createDynamicEventBasedJob({
 ```
 
 ### 3. Condition-Based Jobs
-
-#### Static Condition-Based Job
 ```typescript
-const staticConditionJob = await triggerx.createStaticConditionBasedJob({
+// Static Condition-Based Job
+const staticConditionJob = await triggerx.createConditionBasedJob({
   userAddress: walletAddress,
   targetChainId: '1',
   targetContract: '0x...',
   targetFunction: 'executeSwap',
+  isDynamic: false,
   scriptIpfsUrl: 'ipfs://...',
   scriptTriggerFunction: 'checkPrice',
   arguments: ['1000000000000000000']
 });
-```
 
-#### Dynamic Condition-Based Job
-```typescript
-const dynamicConditionJob = await triggerx.createDynamicConditionBasedJob({
+// Dynamic Condition-Based Job
+const dynamicConditionJob = await triggerx.createConditionBasedJob({
   userAddress: walletAddress,
   targetChainId: '1',
   targetContract: '0x...',
   targetFunction: 'executeSwap',
+  isDynamic: true,
   scriptIpfsUrl: 'ipfs://...',
   scriptTriggerFunction: 'checkPrice',
   arguments: ['1000000000000000000']
@@ -139,22 +134,31 @@ const dynamicConditionJob = await triggerx.createDynamicConditionBasedJob({
 - `targetContract`: Contract address to execute
 - `targetFunction`: Function to call on the target contract
 - `arguments`: Array of arguments for the target function
+- `isDynamic`: Whether to use dynamic execution mode (requires script configuration)
 - `stake_amount`: Amount to stake (optional)
 - `token_amount`: Amount of tokens (optional)
 - `priority`: Job priority (default: 1)
 - `security`: Security level (default: 1)
 - `recurring`: Whether the job should repeat (default: true)
 
-### Time-Based Job Options
+### Dynamic Mode Options
+When `isDynamic` is true, these options are required:
+- `scriptIpfsUrl`: IPFS URL of the execution script
+- `scriptTriggerFunction`: Function name in the script to execute
+
+### Job-Specific Options
+
+#### Time-Based Jobs
 - `timeInterval`: Interval in seconds between executions
 - `startTime`: Optional start time (timestamp)
 
-### Event-Based Job Options
+#### Event-Based Jobs
 - `triggerChainId`: Chain ID to monitor for events
 - `triggerContract`: Contract address to monitor
 - `eventName`: Name of the event to monitor
 
-### Condition-Based Job Options
+#### Condition-Based Jobs
+Always requires:
 - `scriptIpfsUrl`: IPFS URL of the condition script
 - `scriptTriggerFunction`: Function name in the script to check conditions
 
@@ -193,7 +197,10 @@ The SDK uses axios for HTTP requests. Always wrap SDK calls in try-catch blocks:
 
 ```typescript
 try {
-  const job = await triggerx.createStaticTimeBasedJob({...});
+  const job = await triggerx.createTimeBasedJob({
+    isDynamic: false,
+    // ... other config
+  });
 } catch (error) {
   if (axios.isAxiosError(error)) {
     console.error('API Error:', error.response?.data);
@@ -213,7 +220,8 @@ import {
   EventBasedJobConfig,
   ConditionBasedJobConfig,
   JobData,
-  UserData
+  UserData,
+  JobType
 } from 'triggerx-sdk';
 ```
 

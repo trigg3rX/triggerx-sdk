@@ -37,6 +37,13 @@ export interface JobData {
   task_ids: number[];
 }
 
+// Job Types
+export enum JobType {
+  TIME = 'TIME',
+  EVENT = 'EVENT',
+  CONDITION = 'CONDITION'
+}
+
 // Base configuration interface
 interface BaseJobConfig {
   userAddress: string;
@@ -49,24 +56,24 @@ interface BaseJobConfig {
   arguments?: string[];
   stake_amount?: string;
   token_amount?: string;
+  isDynamic?: boolean; // Determines if job is dynamic or static
+  scriptIpfsUrl?: string; // Required for dynamic jobs
+  scriptTriggerFunction?: string; // Required for dynamic jobs
 }
 
 export interface TimeBasedJobConfig extends BaseJobConfig {
   timeInterval: number;
   startTime?: number;
-  scriptIpfsUrl?: string;
-  scriptTriggerFunction?: string;
 }
 
 export interface EventBasedJobConfig extends BaseJobConfig {
   triggerChainId: string;
   triggerContract: string;
   eventName: string;
-  scriptIpfsUrl?: string;
-  scriptTriggerFunction?: string;
 }
 
 export interface ConditionBasedJobConfig extends BaseJobConfig {
+  // Condition-based jobs always require script info
   scriptIpfsUrl: string;
   scriptTriggerFunction: string;
 }
@@ -121,19 +128,19 @@ export enum TaskType {
   DYNAMIC = 'DYNAMIC'
 }
 
-// Task Definition IDs mapping
+// Task Definition IDs mapping based on job type and dynamic/static
 export const TaskDefinitionIds = {
-  [TriggerType.TIME]: {
-    [TaskType.STATIC]: 1,
-    [TaskType.DYNAMIC]: 2
+  [JobType.TIME]: {
+    static: 1,
+    dynamic: 2
   },
-  [TriggerType.CONDITION]: {
-    [TaskType.STATIC]: 3,
-    [TaskType.DYNAMIC]: 4
+  [JobType.EVENT]: {
+    static: 5,
+    dynamic: 6
   },
-  [TriggerType.EVENT]: {
-    [TaskType.STATIC]: 5,
-    [TaskType.DYNAMIC]: 6
+  [JobType.CONDITION]: {
+    static: 3,
+    dynamic: 4
   }
 };
 
