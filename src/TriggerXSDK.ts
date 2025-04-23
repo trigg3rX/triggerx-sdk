@@ -15,8 +15,9 @@ import {
 
 export class TriggerXSDK {
   private client: AxiosInstance;
+  private userAddress: string;
 
-  constructor(apiKey: string, baseURL: string = 'http://192.168.1.57:9002/') {  
+  constructor(apiKey: string, userAddress: string, baseURL: string = 'http://192.168.1.57:9002/') {  
     this.client = axios.create({
       baseURL,
       headers: {
@@ -24,91 +25,114 @@ export class TriggerXSDK {
         'Content-Type': 'application/json',
       },
     });
+    this.userAddress = userAddress;
   }
 
   // Main job creation methods
   async createTimeBasedJob(config: TimeBasedJobConfig) {
-    const taskDefinitionId = TaskDefinitionIds[JobType.TIME][config.isDynamic ? 'dynamic' : 'static'];
+    const taskDefinitionId = TaskDefinitionIds[JobType.TIME][config.argType === 1 ? 'static' : 'dynamic'];
     
-    if (config.isDynamic && (!config.scriptIpfsUrl || !config.scriptTriggerFunction)) {
-      throw new Error('Dynamic jobs require scriptIpfsUrl and scriptTriggerFunction');
+    if (config.argType !== 1 && !config.scriptIpfsUrl) {
+      throw new Error('Dynamic jobs require scriptIpfsUrl');
+    }
+
+    if (config.argType === 1 && !config.arguments) {
+      throw new Error('Static jobs require arguments');
     }
 
     const jobData: CreateJobRequest[] = [{
-      user_address: config.userAddress,
+      user_address: this.userAddress,
       task_definition_id: taskDefinitionId,
-      stake_amount: config.stake_amount || '0',
-      token_amount: config.token_amount || '0',
-      priority: config.priority || 1,
-      security: config.security || 1,
+      stake_amount: config.stakeAmount,
+      token_amount: config.tokenAmount,
+      priority: 1, // Default value
+      security: 1, // Default value
       recurring: config.recurring ?? true,
       time_interval: config.timeInterval,
-      time_frame: config.startTime || Math.floor(Date.now() / 1000),
+      time_frame: config.timeFrame || Math.floor(Date.now() / 1000),
       trigger_chain_id: config.targetChainId,
-      trigger_contract_address: config.targetContract,
+      trigger_contract_address: config.targetContractAddress,
       trigger_event: '',
       script_ipfs_url: config.scriptIpfsUrl || '',
-      script_trigger_function: config.scriptTriggerFunction || '',
+      script_trigger_function: '',
       target_chain_id: config.targetChainId,
-      target_contract_address: config.targetContract,
+      target_contract_address: config.targetContractAddress,
       target_function: config.targetFunction,
-      arguments: config.arguments || []
+      arg_type: config.argType,
+      arguments: config.arguments || [],
+      script_target_function: ''
     }];
     return this.createJob(jobData);
   }
 
   async createEventBasedJob(config: EventBasedJobConfig) {
-    const taskDefinitionId = TaskDefinitionIds[JobType.EVENT][config.isDynamic ? 'dynamic' : 'static'];
+    const taskDefinitionId = TaskDefinitionIds[JobType.EVENT][config.argType === 1 ? 'static' : 'dynamic'];
     
-    if (config.isDynamic && (!config.scriptIpfsUrl || !config.scriptTriggerFunction)) {
-      throw new Error('Dynamic jobs require scriptIpfsUrl and scriptTriggerFunction');
+    if (config.argType !== 1 && !config.scriptIpfsUrl) {
+      throw new Error('Dynamic jobs require scriptIpfsUrl');
+    }
+
+    if (config.argType === 1 && !config.arguments) {
+      throw new Error('Static jobs require arguments');
     }
 
     const jobData: CreateJobRequest[] = [{
-      user_address: config.userAddress,
+      user_address: this.userAddress,
       task_definition_id: taskDefinitionId,
-      stake_amount: config.stake_amount || '0',
-      token_amount: config.token_amount || '0',
-      priority: config.priority || 1,
-      security: config.security || 1,
+      stake_amount: config.stakeAmount,
+      token_amount: config.tokenAmount,
+      priority: 1, // Default value
+      security: 1, // Default value
       recurring: config.recurring ?? true,
       time_interval: 0,
-      time_frame: Math.floor(Date.now() / 1000),
+      time_frame: config.timeFrame || Math.floor(Date.now() / 1000),
       trigger_chain_id: config.triggerChainId,
-      trigger_contract_address: config.triggerContract,
-      trigger_event: config.eventName,
+      trigger_contract_address: config.triggerContractAddress,
+      trigger_event: config.triggerEvent,
       script_ipfs_url: config.scriptIpfsUrl || '',
       script_trigger_function: config.scriptTriggerFunction || '',
       target_chain_id: config.targetChainId,
-      target_contract_address: config.targetContract,
+      target_contract_address: config.targetContractAddress,
       target_function: config.targetFunction,
-      arguments: config.arguments || []
+      arg_type: config.argType,
+      arguments: config.arguments || [],
+      script_target_function: ''
     }];
     return this.createJob(jobData);
   }
 
   async createConditionBasedJob(config: ConditionBasedJobConfig) {
-    const taskDefinitionId = TaskDefinitionIds[JobType.CONDITION][config.isDynamic ? 'dynamic' : 'static'];
+    const taskDefinitionId = TaskDefinitionIds[JobType.CONDITION][config.argType === 1 ? 'static' : 'dynamic'];
+
+    if (config.argType !== 1 && !config.scriptIpfsUrl) {
+      throw new Error('Dynamic jobs require scriptIpfsUrl');
+    }
+
+    if (config.argType === 1 && !config.arguments) {
+      throw new Error('Static jobs require arguments');
+    }
 
     const jobData: CreateJobRequest[] = [{
-      user_address: config.userAddress,
+      user_address: this.userAddress,
       task_definition_id: taskDefinitionId,
-      stake_amount: config.stake_amount || '0',
-      token_amount: config.token_amount || '0',
-      priority: config.priority || 1,
-      security: config.security || 1,
+      stake_amount: config.stakeAmount,
+      token_amount: config.tokenAmount,
+      priority: 1, // Default value
+      security: 1, // Default value
       recurring: config.recurring ?? true,
       time_interval: 0,
-      time_frame: Math.floor(Date.now() / 1000),
-      trigger_chain_id: config.targetChainId,
-      trigger_contract_address: config.targetContract,
-      trigger_event: '',
-      script_ipfs_url: config.scriptIpfsUrl,
-      script_trigger_function: config.scriptTriggerFunction,
+      time_frame: config.timeFrame || Math.floor(Date.now() / 1000),
+      trigger_chain_id: config.triggerChainId,
+      trigger_contract_address: config.triggerContractAddress,
+      trigger_event: config.triggerEvent,
+      script_ipfs_url: config.scriptIpfsUrl || '',
+      script_trigger_function: '',
       target_chain_id: config.targetChainId,
-      target_contract_address: config.targetContract,
+      target_contract_address: config.targetContractAddress,
       target_function: config.targetFunction,
-      arguments: config.arguments || []
+      arg_type: config.argType,
+      arguments: config.arguments || [],
+      script_target_function: ''
     }];
     return this.createJob(jobData);
   }

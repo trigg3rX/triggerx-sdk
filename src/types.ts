@@ -44,38 +44,50 @@ export enum JobType {
   CONDITION = 'CONDITION'
 }
 
-// Base configuration interface
+// Updated base configuration interface
 interface BaseJobConfig {
-  userAddress: string;
-  priority?: number;
-  security?: number;
-  recurring?: boolean;
+  stakeAmount: string;
+  tokenAmount: string;
   targetChainId: string;
-  targetContract: string;
+  targetContractAddress: string;
   targetFunction: string;
-  arguments?: string[];
-  stake_amount?: string;
-  token_amount?: string;
-  isDynamic?: boolean; // Determines if job is dynamic or static
-  scriptIpfsUrl?: string; // Required for dynamic jobs
-  scriptTriggerFunction?: string; // Required for dynamic jobs
+  argType: number;
+  timeFrame?: number;
+  recurring?: boolean;
+}
+
+// For static jobs
+interface StaticJobConfig extends BaseJobConfig {
+  arguments: string[];
+}
+
+// For dynamic jobs
+interface DynamicJobConfig extends BaseJobConfig {
+  scriptIpfsUrl: string;
+  scriptTriggerFunction?: string;
 }
 
 export interface TimeBasedJobConfig extends BaseJobConfig {
   timeInterval: number;
-  startTime?: number;
+  arguments?: string[];
+  scriptIpfsUrl?: string; // Required only for dynamic jobs
 }
 
 export interface EventBasedJobConfig extends BaseJobConfig {
   triggerChainId: string;
-  triggerContract: string;
-  eventName: string;
+  triggerContractAddress: string;
+  triggerEvent: string;
+  arguments?: string[];
+  scriptIpfsUrl?: string; // Required only for dynamic jobs
+  scriptTriggerFunction?: string;
 }
 
 export interface ConditionBasedJobConfig extends BaseJobConfig {
-  // Condition-based jobs always require script info
-  scriptIpfsUrl: string;
-  scriptTriggerFunction: string;
+  triggerChainId: string;
+  triggerContractAddress: string;
+  triggerEvent: string;
+  arguments?: string[];
+  scriptIpfsUrl?: string; // Required only for dynamic jobs
 }
 
 export interface CreateJobRequest {
@@ -96,7 +108,9 @@ export interface CreateJobRequest {
   target_chain_id: string;
   target_contract_address: string;
   target_function: string;
+  arg_type: number;
   arguments: string[];
+  script_target_function: string;
 }
 
 export interface UpdateJobRequest {
@@ -149,7 +163,7 @@ export interface CreateJobOptions {
   triggerType: TriggerType;
   taskType: TaskType;
   
-  // Time trigger specific
+  // Time trigger specific``
   timeInterval?: number;
   startTime?: number;
   
